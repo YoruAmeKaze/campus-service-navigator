@@ -22,8 +22,11 @@ Read [references/schema.md](references/schema.md) when creating or validating re
 ## Default interaction flow
 
 - If the institution is known from the current conversation or a trustworthy existing directory, do not ask again. If it is unknown and materially affects the answer, ask only for the institution (and campus when relevant).
-- Preserve the user's broader goal of building a useful, reasonably complete service directory. Explore and batch related first-party campus sites, deduplicate overlapping entries, and keep lower-priority discoveries as sourced candidates rather than silently dropping them.
-- Give the best-supported direct answer as soon as it is available, then finish relevant directory enrichment in the same run. Do not make the user wait for a complete crawl before sharing a high-confidence answer.
+- Follow a source-first workflow: reuse a fresh local directory if available; otherwise establish the institution's official starting domain, locate relevant service-owner/navigation pages, then verify candidate entry points against those official sources. See [references/discovery-and-safety.md](references/discovery-and-safety.md).
+- Batch and, where tools permit, parallelize independent read-only checks across relevant official pages. Do not serialize one-page-at-a-time narration or repeatedly re-confirm facts already established in the current task.
+- Preserve the user's broader goal of building a useful, reasonably complete service directory. Explore relevant first-party campus sites, deduplicate overlapping entries, and keep lower-priority discoveries as sourced candidates rather than silently dropping them. Do not expand into unrelated site sections just to maximize record count.
+- Give the best-supported direct answer as soon as it is available, then complete relevant directory enrichment in the same run. Do not make the user wait for a full inventory before sharing a high-confidence answer.
+- Scale verification to the claim: a directory citation may support that an entry is officially listed; live page checks are useful for reachability or observed access gates; account-level and transaction claims remain unverified without authorized access. Avoid redundant checks that cannot strengthen the answer.
 - Keep progress updates sparse: announce the investigation once, then report the result and material limitations. Avoid narrating each page visit or repeating confirmations.
 - Distinguish answering a service-finding question from accessing the user's account. Never request credentials or imply that you can see personal records or execute payment/registration actions.
 
