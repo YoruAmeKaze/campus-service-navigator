@@ -1,0 +1,7 @@
+interface:
+  display_name: "Campus Service Navigator"
+  short_description: "校园服务目录、导航与知识库生成"
+  brand_color: "#2563EB"
+  default_prompt: "Use $campus-service-navigator to find the best sourced campus service entry for my request."
+policy:
+  allow_implicit_invocation: true
