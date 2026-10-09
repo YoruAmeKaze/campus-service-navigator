@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 
-const REQUIRED = ['serviceId', 'name', 'entryUrl', 'sourcePage', 'platform', 'requiresLogin', 'confidence'];
+const REQUIRED = ['serviceId', 'name', 'description', 'category', 'entryUrl', 'sourcePage', 'platform', 'requiresLogin', 'confidence'];
+const CONFIDENCE_LEVELS = ['high', 'medium', 'low'];
 
 export async function validateDirectory(file) {
   const errors = [];
@@ -14,6 +15,7 @@ export async function validateDirectory(file) {
   const seen = new Set();
   for (const [index, service] of (document?.services || []).entries()) {
     for (const field of REQUIRED) if (!(field in (service || {}))) errors.push(`services[${index}] 缺少字段 ${field}。`);
+    if ('serviceId' in (service || {}) && (typeof service.serviceId !== 'string' || !service.serviceId.trim())) errors.push(`services[${index}].serviceId 必须是非空字符串。`);
     if (service?.serviceId && seen.has(service.serviceId)) errors.push(`services[${index}] serviceId 重复：${service.serviceId}。`);
     if (service?.serviceId) seen.add(service.serviceId);
     for (const field of ['entryUrl', 'sourcePage']) {
@@ -21,6 +23,7 @@ export async function validateDirectory(file) {
       catch { errors.push(`services[${index}].${field} 不是有效 URL。`); }
     }
     if (typeof service?.requiresLogin !== 'boolean') errors.push(`services[${index}].requiresLogin 必须是布尔值。`);
+    if ('confidence' in (service || {}) && !CONFIDENCE_LEVELS.includes(service.confidence)) errors.push(`services[${index}].confidence 必须是 high、medium 或 low 之一。`);
   }
   return { valid: errors.length === 0, errors, serviceCount: document?.services?.length || 0, schemaVersion: document?.schemaVersion };
 }
