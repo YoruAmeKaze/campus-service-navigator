@@ -11,6 +11,17 @@ function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function validatePublicUrl(value) {
+  try {
+    const url = new URL(value);
+    if (!['http:', 'https:'].includes(url.protocol)) return '必须使用 HTTP 或 HTTPS 协议。';
+    if (url.username || url.password) return '不得在 URL 中包含用户名或密码。';
+    return null;
+  } catch {
+    return '不是有效 URL。';
+  }
+}
+
 export async function validateDirectory(file) {
   const errors = [];
   let document;
@@ -21,6 +32,16 @@ export async function validateDirectory(file) {
     return { valid: false, errors: ['目录必须是 JSON 对象。'], serviceCount: 0 };
   }
   if (document?.schemaVersion !== '0.1') errors.push('schemaVersion 必须为 0.1。');
+  if (Object.hasOwn(document, 'sourceUrl')) {
+    if (typeof document.sourceUrl !== 'string' || !document.sourceUrl.trim()) errors.push('sourceUrl 必须是非空字符串。');
+    else {
+      const issue = validatePublicUrl(document.sourceUrl);
+      if (issue) errors.push(`sourceUrl ${issue}`);
+    }
+  }
+  if (Object.hasOwn(document, 'generatedAt') && (typeof document.generatedAt !== 'string' || !document.generatedAt.trim() || Number.isNaN(Date.parse(document.generatedAt)))) {
+    errors.push('generatedAt 必须是有效的日期时间字符串。');
+  }
 
   if (!Array.isArray(document.services)) {
     errors.push('services 必须是数组。');
@@ -53,14 +74,8 @@ export async function validateDirectory(file) {
 
     for (const field of URL_FIELDS) {
       if (typeof service[field] !== 'string' || !service[field].trim()) continue;
-      try {
-        const url = new URL(service[field]);
-        if (!['http:', 'https:'].includes(url.protocol)) {
-          errors.push(`services[${index}].${field} 必须使用 HTTP 或 HTTPS 协议。`);
-        }
-      } catch {
-        errors.push(`services[${index}].${field} 不是有效 URL。`);
-      }
+      const issue = validatePublicUrl(service[field]);
+      if (issue) errors.push(`services[${index}].${field} ${issue}`);
     }
 
     if (Object.hasOwn(service, 'requiresLogin') && typeof service.requiresLogin !== 'boolean') {

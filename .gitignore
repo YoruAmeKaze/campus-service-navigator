@@ -1,0 +1,9 @@
+# Local review material and generated artifacts
+campus-service-navigator-评审报告.md
+.temp/
+campus-output/
+service-output/
+
+# Local editor metadata and distributable archives
+.vscode/
+*.zip

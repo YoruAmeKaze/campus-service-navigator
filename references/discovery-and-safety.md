@@ -4,7 +4,7 @@ Deep-crawl same-origin public HTML pages only. Record external links as candidat
 
 Reject non-HTTP(S) URLs and private, loopback, link-local, or metadata-network targets. Re-check the final URL after redirects and enforce per-site page, byte, timeout, and rate limits.
 
-Use this generic discovery sequence, adapting it to the institution rather than hard-coding one school's domains or page names:
+Use this generic discovery sequence, adapting it to the institution rather than hard-coding organization-specific domains or page names:
 
 1. Reuse a recent local service directory and confirm its source/verification dates.
 2. Establish the official institution domain from user-provided context or an authoritative search/source.

@@ -8,18 +8,18 @@ import { validateDirectory } from '../scripts/validate-directory.mjs';
 
 const validService = {
   serviceId: 'service-1',
-  name: '成绩查询',
-  description: '查看成绩',
-  category: '学习',
-  entryUrl: 'https://example.edu/service',
-  sourcePage: 'https://example.edu/',
-  platform: '学校门户',
+  name: '收入证明办理',
+  description: '查看公开办理说明',
+  category: '证明办理',
+  entryUrl: 'https://example.org/service',
+  sourcePage: 'https://example.org/',
+  platform: '机构门户',
   requiresLogin: true,
   confidence: 'high'
 };
 
 async function writeFixture(t, document) {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'campus-service-navigator-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'service-navigator-'));
   t.after(() => fs.rm(dir, { recursive: true, force: true }));
   const file = path.join(dir, 'directory.json');
   await fs.writeFile(file, JSON.stringify(document));
@@ -29,7 +29,7 @@ async function writeFixture(t, document) {
 test('accepts a correctly typed directory and optional string arrays', async (t) => {
   const { file } = await writeFixture(t, {
     schemaVersion: '0.1',
-    services: [{ ...validService, aliases: ['查成绩'], accessHints: ['需要登录'], audiences: [], tags: [] }]
+    services: [{ ...validService, aliases: ['开收入证明'], accessHints: ['需要登录'], audiences: [], tags: [] }]
   });
 
   const result = await validateDirectory(file);
@@ -56,7 +56,7 @@ test('rejects empty and non-HTTP(S) URLs and fields with invalid types', async (
       entryUrl: '',
       sourcePage: 'javascript:alert(1)',
       name: 23,
-      aliases: '查成绩'
+      aliases: '开收入证明'
     }]
   });
 
@@ -71,12 +71,12 @@ test('rejects empty and non-HTTP(S) URLs and fields with invalid types', async (
 test('escapes untrusted multiline fields in the Markdown report', async (t) => {
   const { dir, file } = await writeFixture(t, {
     schemaVersion: '0.1',
-    generatedAt: 'today\n## forged heading',
-    sourceUrl: 'https://example.edu/\n- forged item',
+    generatedAt: '2026-01-01T00:00:00Z',
+    sourceUrl: 'https://example.org/\n- forged item',
     services: [{
       ...validService,
       name: 'Service\n## forged [link](https://evil.example) <img src=x onerror=alert(1)>',
-      category: '学习\n- forged category'
+      category: '支持\n- forged category'
     }]
   });
   const outDir = path.join(dir, 'out');
@@ -88,4 +88,19 @@ test('escapes untrusted multiline fields in the Markdown report', async (t) => {
   assert.doesNotMatch(report, /\n- forged item/);
   assert.doesNotMatch(report, /(?<!\\)<img/);
   assert.match(report, /Service \\#\\# forged/);
+});
+
+test('rejects malformed root metadata and URLs containing credentials', async (t) => {
+  const { file } = await writeFixture(t, {
+    schemaVersion: '0.1',
+    sourceUrl: 'https://user:secret@example.org/',
+    generatedAt: 'not-a-date',
+    services: [{ ...validService, entryUrl: 'https://user:secret@example.org/service' }]
+  });
+
+  const result = await validateDirectory(file);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((error) => error.includes('sourceUrl 不得在 URL 中包含用户名或密码')));
+  assert.ok(result.errors.some((error) => error.includes('generatedAt 必须是有效的日期时间')));
+  assert.ok(result.errors.some((error) => error.includes('entryUrl 不得在 URL 中包含用户名或密码')));
 });

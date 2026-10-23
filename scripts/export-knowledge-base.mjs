@@ -1,12 +1,36 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { validateDirectory } from './validate-directory.mjs';
 
 function escapeMarkdown(value) {
   return String(value ?? '')
     .replace(/[\r\n\u2028\u2029]+/g, ' ')
     .replace(/([\\`*_{}\[\]()#+\-.!|<>:@~])/g, '\\$1');
+}
+
+function renderReport(template, directory) {
+  const categories = new Map();
+  for (const service of directory.services) {
+    const category = service.category || '未分类';
+    categories.set(category, (categories.get(category) || 0) + 1);
+  }
+  const reviewItems = directory.services
+    .filter((service) => service.status !== 'active' || service.confidence === 'low')
+    .map((service) => `- ${escapeMarkdown(service.name)}（${escapeMarkdown(service.status || 'unknown')}，${escapeMarkdown(service.confidence || 'unknown')}）`)
+    .join('\n') || '- 暂无';
+  const values = {
+    generatedAt: escapeMarkdown(directory.generatedAt || new Date().toISOString()),
+    sourceUrl: escapeMarkdown(directory.sourceUrl || '未提供'),
+    serviceCount: String(directory.services.length),
+    categorySummary: [...categories].map(([name, count]) => `- ${escapeMarkdown(name)}：${count}`).join('\n') || '- 暂无',
+    reviewItems
+  };
+  for (const key of Object.keys(values)) {
+    if (!template.includes(`{{${key}}}`)) throw new Error(`报告模板缺少占位符 {{${key}}}。`);
+  }
+  return template.replace(/\{\{(generatedAt|sourceUrl|serviceCount|categorySummary|reviewItems)\}\}/g, (_match, key) => values[key]);
 }
 
 export async function exportKnowledgeBase(input, outDir) {
@@ -19,9 +43,9 @@ export async function exportKnowledgeBase(input, outDir) {
     text: [service.name, service.description, ...(service.aliases || []), ...(service.accessHints || [])].filter(Boolean).join('。'),
     metadata: { ...service, source: service.sourcePage }
   }));
-  const categories = new Map();
-  for (const service of directory.services) categories.set(service.category || '未分类', (categories.get(service.category || '未分类') || 0) + 1);
-  const report = `# 校园服务目录报告\n\n- 生成时间：${escapeMarkdown(directory.generatedAt || new Date().toISOString())}\n- 来源入口：${escapeMarkdown(directory.sourceUrl || '未提供')}\n- 服务数量：${directory.services.length}\n\n## 分类统计\n\n${[...categories].map(([name, count]) => `- ${escapeMarkdown(name)}：${count}`).join('\n') || '- 暂无'}\n\n## 待复核\n\n${directory.services.filter((s) => s.status !== 'active' || s.confidence === 'low').map((s) => `- ${escapeMarkdown(s.name)}（${escapeMarkdown(s.status || 'unknown')}，${escapeMarkdown(s.confidence || 'unknown')}）`).join('\n') || '- 暂无'}\n\n## 限制\n\n仅包含公开页面中的服务元数据和办理线索；登录要求、链接状态和描述均需人工复核。\n`;
+  const templatePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'report-template.md');
+  const template = await fs.readFile(templatePath, 'utf8');
+  const report = renderReport(template, directory);
   await fs.writeFile(path.join(outDir, 'knowledge-base.jsonl'), `${lines.join('\n')}\n`);
   await fs.writeFile(path.join(outDir, 'REPORT.md'), report);
   await fs.writeFile(path.join(outDir, 'service-directory.json'), `${JSON.stringify(directory, null, 2)}\n`);

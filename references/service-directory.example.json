@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "0.1",
+  "sourceUrl": "https://services.example.org/",
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "sites": [
+    {
+      "url": "https://services.example.org/",
+      "role": "official starting domain",
+      "approved": true
+    }
+  ],
+  "services": [
+    {
+      "serviceId": "income-certificate",
+      "name": "收入证明办理",
+      "description": "办理收入证明并查看公开的申请说明。",
+      "category": "证明办理",
+      "entryUrl": "https://services.example.org/certificate",
+      "sourcePage": "https://services.example.org/",
+      "platform": "services.example.org",
+      "requiresLogin": true,
+      "confidence": "medium",
+      "aliases": ["开收入证明", "收入证明"],
+      "accessHints": ["页面可能要求机构账号登录"],
+      "status": "active",
+      "evidence": ["机构服务页列出证明办理入口"],
+      "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
