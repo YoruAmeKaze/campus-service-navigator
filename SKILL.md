@@ -1,8 +1,8 @@
 ---
 name: service-navigator
 name_cn: 机构服务导航
-description_cn: 构建公共机构服务目录、查找办事入口并导出知识库；支持“我该去哪里办”“去哪办理”“办事窗口”“服务大厅”“官网服务入口”等通用请求。
-description: Build a sourced service directory for public institutions, answer service-navigation questions, and export AI-ready JSONL and Markdown knowledge-base artifacts. Trigger for service navigation, 机构服务导航, 办事入口, 去哪办, 去哪办理, 办事窗口, 服务大厅, 官方入口, 机构官网, or 服务查询 requests.
+description_cn: 构建公共机构服务目录、查找办事入口并导出知识库；支持“我该去哪里办”“去哪办理”“怎么办”“办事窗口”“服务大厅”“办理流程”等通用请求。
+description: Build a sourced service directory for public institutions, answer service-navigation questions, and export AI-ready JSONL and Markdown knowledge-base artifacts. Trigger for service navigation, 机构服务导航, 办事入口, 去哪办, 去哪办理, 怎么办, 在哪办理, 办理流程, 办事指南, 缴费入口, 办事窗口, 服务大厅, 官方入口, 机构官网, 机构服务查询, or 办事服务查询 requests.
 metadata:
   short-description: 机构服务目录与导航知识库
 ---
@@ -47,6 +47,8 @@ Use [references/service-directory.example.json](references/service-directory.exa
 
 ## Scripts
 
+Requires Node.js 20 or newer. The package uses ECMAScript modules, top-level await, and recursive directory inspection in the packaging check.
+
 From this skill directory, use:
 
 ```powershell
@@ -61,4 +63,4 @@ If Node.js is unavailable, follow [references/schema.md](references/schema.md) t
 ## Packaging
 
 When creating a distributable archive, apply [.skillignore](.skillignore) first. Never include `.git`, editor metadata, generated output, archives, or review reports.
-The `tests/` directory is repository-only; run `node --test tests/*.test.mjs` before packaging, then exclude it from the distributable archive. Copy the allowlisted files to a clean staging directory and run `node scripts/check-package.mjs path\to\staging` to verify required files and forbidden paths before creating the archive.
+The `tests/` directory is repository-only; run `node --test tests\directory-validation.test.mjs` in Windows PowerShell or `node --test tests/*.test.mjs` in Bash/WSL before packaging, then exclude it from the distributable archive. The `agents/` directory contains host integration metadata and remains in the package; `tests/` remains repository-only. Copy the allowlisted files to a clean staging directory and run `node scripts/check-package.mjs path\to\staging` to verify required files and forbidden paths before creating the archive.
