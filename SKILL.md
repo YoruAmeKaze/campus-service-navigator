@@ -1,13 +1,22 @@
 ---
 name: service-navigator
 name_cn: 机构服务导航
-description_cn: 构建公共机构服务目录、查找办事入口并导出知识库；支持“我该去哪里办”“去哪办理”“怎么办”“办事窗口”“服务大厅”“办理流程”等通用请求。
-description: Build a sourced service directory for public institutions, answer service-navigation questions, and export AI-ready JSONL and Markdown knowledge-base artifacts. Trigger for service navigation, 机构服务导航, 办事入口, 去哪办, 去哪办理, 怎么办, 在哪办理, 办理流程, 办事指南, 缴费入口, 办事窗口, 服务大厅, 官方入口, 机构官网, 机构服务查询, or 办事服务查询 requests.
+description_cn: 构建公共机构服务目录、查找办事入口并导出知识库；支持带有机构服务语境的“我该去哪里办”“去哪办理”“怎么办”“办事窗口”“服务大厅”“办理流程”等请求。
+description: Build a sourced service directory for public institutions, answer institution-service navigation questions, and export AI-ready JSONL and Markdown knowledge-base artifacts. Trigger for service navigation, 机构服务导航, 办事入口, 去哪办, 去哪办理, 怎么办, 在哪办理, 办理流程, 办事指南, 缴费入口, 办事窗口, 服务大厅, 官方入口, 机构官网, 机构服务查询, or 办事服务查询 requests when the request also mentions an institution, organization, official site, service, application, payment, office, or process context.
 metadata:
   short-description: 机构服务目录与导航知识库
 ---
 
 # Service Navigator
+
+## Repository layout
+
+- `agents/openai.yaml`: host integration metadata used by the runtime.
+- `assets/`: required runtime templates.
+- `references/`: progressively loaded domain rules, schemas, and examples.
+- `scripts/`: deterministic validation, export, and package-check helpers.
+- `tests/`: repository-only automated verification; exclude it from releases.
+- `LICENSE`: distribution and reuse terms.
 
 Use this skill when a user wants to discover, organize, navigate, or export services from one or more public institution websites, such as universities, companies, hospitals, government offices, or nonprofits.
 
